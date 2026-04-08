@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adverse-market"
+version = "1.0.0"
+description = "AdverseMarket-v0: Adversarial RL Trading Benchmark for OpenEnv"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "stable-baselines3>=2.3.0",
+    "sb3-contrib>=2.3.0",
+    "gymnasium>=0.29.0",
+    "pydantic>=2.0.0",
+    "openai>=1.0.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "matplotlib>=3.7.0",
+    "gradio>=4.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+]
+
+[project.urls]
+"Homepage" = "https://huggingface.co/spaces/Ranjan00001/Adverse_market"
+"Bug Tracker" = "https://github.com/Ranjan-wtg/Adverse_Market/issues"
