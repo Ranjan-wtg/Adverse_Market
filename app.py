@@ -5,10 +5,8 @@ import threading
 import queue
 import sys
 
-def run_benchmark(task_id, api_key):
+def run_benchmark(task_id):
     env = os.environ.copy()
-    if api_key:
-        env["OPENAI_API_KEY"] = api_key
     env["TASK_ID"] = task_id
     
     process = subprocess.Popen(
@@ -39,11 +37,7 @@ with gr.Blocks(title="AdverseMarket-v0 Benchmark") as demo:
                 value="calm-market",
                 label="Select Task"
             )
-            api_key_input = gr.Textbox(
-                label="OpenAI API Key (Optional)",
-                placeholder="Enter key to enable LLM-based agent...",
-                type="password"
-            )
+            gr.Markdown("Note: Using hardcoded Groq LLM (openai/gpt-oss-20b) for evaluation.")
             run_btn = gr.Button("Run Benchmark", variant="primary")
             
         with gr.Column():
@@ -56,7 +50,7 @@ with gr.Blocks(title="AdverseMarket-v0 Benchmark") as demo:
             
     run_btn.click(
         fn=run_benchmark,
-        inputs=[task_select, api_key_input],
+        inputs=[task_select],
         outputs=output_log
     )
     
