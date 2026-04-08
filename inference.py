@@ -1,4 +1,5 @@
 import os, sys, json, traceback
+import numpy as np
 from openai import OpenAI
 from env.openenv_wrapper import OpenEnvAdverseMarket, Action
 from tasks.task_definitions import TASKS
@@ -7,14 +8,11 @@ from tasks.task_grader import GRADERS
 # ── Environment variables (with defaults) ──────────────────────────
 API_BASE_URL = os.getenv('API_BASE_URL', 'https://api.openai.com/v1')
 MODEL_NAME   = os.getenv('MODEL_NAME', 'gpt-4.1-mini')
-# Support both HF_TOKEN (often used in Spaces) or OPENAI_API_KEY
 API_KEY      = os.getenv('HF_TOKEN') or os.getenv('OPENAI_API_KEY')
 
-client = None
-if API_KEY:
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+IS_FALLBACK  = (API_KEY is None)
+client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY) if API_KEY else None
 
-# ── LLM action selection ───────────────────────────────
 ACTIONS_DESC = {
     0: 'HOLD', 1: 'BUY_10%', 2: 'BUY_20%', 3: 'BUY_33%',
     4: 'SELL_10%', 5: 'SELL_20%', 6: 'SELL_33%',
@@ -22,8 +20,8 @@ ACTIONS_DESC = {
 }
 
 def llm_select_action(obs_dict: dict, step: int) -> int:
-    if client is None:
-        return 0  # Fallback to HOLD if no API key is provided
+    if IS_FALLBACK:
+        return np.random.randint(0, 9)  # Random trade if no API key
     
     prompt = f"""You are a financial trading agent.
 Current market observation (step {step}/1000):
