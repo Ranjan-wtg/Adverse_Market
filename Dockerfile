@@ -23,4 +23,4 @@ EXPOSE 7860
 
 # Default: run calm-market task
 ENV TASK_ID=calm-market
-CMD ["python", "app.py"]
+CMD ["python", "-m", "server.app"]

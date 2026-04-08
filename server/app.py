@@ -72,6 +72,9 @@ with gr.Blocks(title="AdverseMarket-v0 Benchmark") as demo:
 # ── Mount Gradio to FastAPI ───────────────────────────────────────
 app = gr.mount_gradio_app(app, demo, path="/ui")
 
-if __name__ == "__main__":
+def main():
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=7860)
+
+if __name__ == "__main__":
+    main()

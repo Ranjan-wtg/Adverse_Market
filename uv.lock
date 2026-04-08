@@ -1,0 +1,21 @@
+version = 1
+revision = 1
+
+[[package]]
+name = "adverse-market"
+version = "1.0.0"
+source = { virtual = true }
+dependencies = [
+    { name = "fastapi" },
+    { name = "gradio" },
+    { name = "gymnasium" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "openai" },
+    { name = "openenv-core" },
+    { name = "pandas" },
+    { name = "pydantic" },
+    { name = "sb3-contrib" },
+    { name = "stable-baselines3" },
+    { name = "uvicorn" },
+]
