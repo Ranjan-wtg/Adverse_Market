@@ -1,0 +1,21 @@
+name: AdverseMarket-v0
+version: 1.0.0
+description: >
+  Adversarial financial trading environment where the market is a
+  co-evolving RL agent. Tests robustness of trading policies to
+  dynamic volatility shocks, regime shifts, and liquidity crises.
+tags: [openenv, finance, adversarial-rl, trading, robustness]
+tasks:
+  - id: calm-market
+    difficulty: easy
+    description: Trade profitably in a benign bull-market regime.
+  - id: volatile-market
+    difficulty: medium
+    description: Trade profitably under random adversary perturbations.
+  - id: adversarial-market
+    difficulty: hard
+    description: Trade profitably against a trained PPO adversary.
+action_space: Discrete(9)
+observation_space: Box(26,)
+reward_range: [-inf, inf]
+max_steps: 1000
