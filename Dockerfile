@@ -29,4 +29,4 @@ EXPOSE 7860
 
 # Default: run calm-market task
 ENV TASK_ID=calm-market
-CMD ["python", "inference.py"]
+CMD ["python", "app.py"]
