@@ -4,15 +4,15 @@ from env.openenv_wrapper import OpenEnvAdverseMarket, Action
 from tasks.task_definitions import TASKS
 from tasks.task_grader import GRADERS
 
-# ── Environment variables (with required defaults) ─────────────────
+# ── Environment variables (with defaults) ──────────────────────────
 API_BASE_URL = os.getenv('API_BASE_URL', 'https://api.openai.com/v1')
 MODEL_NAME   = os.getenv('MODEL_NAME', 'gpt-4.1-mini')
-HF_TOKEN     = os.getenv('HF_TOKEN')
+# Support both HF_TOKEN (often used in Spaces) or OPENAI_API_KEY
+API_KEY      = os.getenv('HF_TOKEN') or os.getenv('OPENAI_API_KEY')
 
-if HF_TOKEN is None:
-    raise ValueError('HF_TOKEN environment variable is required')
-
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+client = None
+if API_KEY:
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
 # ── LLM action selection ───────────────────────────────
 ACTIONS_DESC = {
@@ -22,6 +22,9 @@ ACTIONS_DESC = {
 }
 
 def llm_select_action(obs_dict: dict, step: int) -> int:
+    if client is None:
+        return 0  # Fallback to HOLD if no API key is provided
+    
     prompt = f"""You are a financial trading agent.
 Current market observation (step {step}/1000):
 - Portfolio return: {obs_dict['portfolio_return']:.4f}
