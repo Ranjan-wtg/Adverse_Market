@@ -47,7 +47,13 @@ The state representation is `Box(26,)` featuring core liquidity and portfolio ma
 
 ## Setup & Usage
 
-**Docker Execution:**
+### Interactive UI (Gradio)
+The easiest way to explore this benchmark is through the **Gradio interface** on Hugging Face Spaces. You can:
+1.  **Select a Task**: Choose between Calm, Volatile, or Adversarial.
+2.  **Provide an API Key**: Paste your `OPENAI_API_KEY` (or `HF_TOKEN` if defined) to run the benchmark with an LLM-based agent.
+3.  **Random Fallback**: If no key is provided, the benchmark performs **Random Trading**. This allows you to verify environment dynamics and see the adversary's impact even without a key.
+
+### Docker Execution
 You can spin up this evaluation environment using standard Docker configurations matching the Hugging Face Spaces spec.
 
 ```bash
@@ -56,13 +62,13 @@ docker build -t adversemarket-v0 .
 
 ```bash
 docker run --rm \
-  -e HF_TOKEN=<your_hugging_face_token> \
+  -e OPENAI_API_KEY=<your_key> \
   -e TASK_ID=calm-market \
   adversemarket-v0
 ```
 
-*Required Environment Variables:*
-- `HF_TOKEN`: Needed to authorize the `OpenAI` client mapping for the evaluation.
+*Environment Variables:*
+- `OPENAI_API_KEY` (or `HF_TOKEN`): Required for the LLM agent. 
 - `TASK_ID`: One of `calm-market`, `volatile-market`, or `adversarial-market`.
 
 ## Baseline Performance Scores
