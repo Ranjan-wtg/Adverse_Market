@@ -8,11 +8,10 @@ from tasks.task_grader import GRADERS
 # ── Environment variables (with defaults) ──────────────────────────
 API_BASE_URL = os.getenv('API_BASE_URL', 'https://api.groq.com/openai/v1')
 MODEL_NAME   = os.getenv('MODEL_NAME', 'openai/gpt-oss-20b')
-# FOR GITHUB: Use dummy key. Set GROQ_API_KEY in your environment/Secrets.
-API_KEY      = os.getenv('GROQ_API_KEY') or "YOUR_GROQ_API_KEY_HERE"
+HF_TOKEN     = os.getenv('HF_TOKEN') or os.getenv('GROQ_API_KEY') # No hardcoded default
 
-IS_FALLBACK  = not API_KEY or API_KEY.strip() == ""
-client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY) if not IS_FALLBACK else None
+IS_FALLBACK  = not HF_TOKEN or HF_TOKEN.strip() == ""
+client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN) if not IS_FALLBACK else None
 
 ACTIONS_DESC = {
     0: 'HOLD', 1: 'BUY_10%', 2: 'BUY_20%', 3: 'BUY_33%',
