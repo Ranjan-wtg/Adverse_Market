@@ -21,9 +21,11 @@ async def reset():
 async def step(action: Action):
     env = get_env()
     obs, reward, done, info = env.step(action)
+    # Ensure reward sent to grader is a float, move metadata to info
+    info["reward_details"] = reward.model_dump()
     return {
         "observation": obs,
-        "reward": reward,
+        "reward": float(reward.value),
         "done": done,
         "info": info
     }
