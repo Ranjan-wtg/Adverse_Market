@@ -24,6 +24,12 @@ app = create_app(
     max_concurrent_envs=1,
 )
 
+from fastapi.responses import RedirectResponse
+@app.get("/")
+def read_root():
+    """Redirect the root URL to our Gradio Dashboard."""
+    return RedirectResponse(url="/ui")
+
 # ── Optional: mount Gradio dashboard at /ui ───────────────────────
 import os, sys, subprocess
 import gradio as gr
