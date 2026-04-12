@@ -82,7 +82,7 @@ def run_task(task_id: str):
                       f' reward=0.00 done=true'
                       f' error={last_error}', flush=True)
                 break
-            r = reward.value
+            r = reward if isinstance(reward, (int, float)) else reward.value
             rewards.append(r)
             err_str = 'null' if last_error is None else last_error
             print(f'[STEP] step={step} action={action_str}'
