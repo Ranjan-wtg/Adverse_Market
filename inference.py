@@ -1,7 +1,7 @@
 import os, sys, json, traceback
 import numpy as np
 from openai import OpenAI
-from env.openenv_wrapper import OpenEnvAdverseMarket, Action
+from env.openenv_wrapper import AdverseMarketEnvironment, AdverseMarketAction
 from tasks.task_definitions import TASKS
 from tasks.task_grader import GRADERS
 
@@ -56,8 +56,8 @@ def run_task(task_id: str):
         except Exception:
             pass  # fall back to random adversary
 
-    env = OpenEnvAdverseMarket(task_id=task_id,
-                              adversary_policy=adversary)
+    env = AdverseMarketEnvironment(task_id=task_id,
+                                   adversary_policy=adversary)
     print(f'[START] task={task_id} env=AdverseMarket-v0'
           f' model={MODEL_NAME}', flush=True)
 
@@ -71,18 +71,19 @@ def run_task(task_id: str):
             action_idx = llm_select_action(obs.model_dump(), step)
             action_str = ACTIONS_DESC.get(action_idx, 'HOLD')
             try:
-                obs, reward, done, info = env.step(
-                    Action(action_index=action_idx))
+                obs = env.step(
+                    AdverseMarketAction(action_index=action_idx))
                 last_error = None
             except Exception as e:
                 last_error = str(e).replace('\n', ' ')[:80]
-                reward_val, done = type('R', (), {'value': 0.0})(), True
+                done = True
                 rewards.append(0.0)
                 print(f'[STEP] step={step} action={action_str}'
                       f' reward=0.00 done=true'
                       f' error={last_error}', flush=True)
                 break
-            r = reward if isinstance(reward, (int, float)) else reward.value
+            r = float(obs.reward) if obs.reward is not None else 0.0
+            done = obs.done
             rewards.append(r)
             err_str = 'null' if last_error is None else last_error
             print(f'[STEP] step={step} action={action_str}'
