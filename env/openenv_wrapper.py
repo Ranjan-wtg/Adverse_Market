@@ -1,26 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any, Union
 import numpy as np
+from openenv.core.env_server import Environment
 
-# We'll import to a mock if the true env isn't provided yet
-try:
-    from env.adverse_market_env import AdverseMarketEnv
-except ImportError:
-    # MOCK ENVIRONMENT since base code isn't provided.
-    class AdverseMarketEnv:
-        def __init__(self, adversary_policy=None):
-            self.cash = 10000.0
-            self.position = 0.0
-            self.price_hist = [100.0]
-            class MockPriceProc:
-                regime = "bull"
-            self.price_proc = MockPriceProc()
-        def reset(self):
-            return np.zeros(26), {}
-        def step(self, action):
-            return np.zeros(26), 0.1, False, False, {'pnl': 0.1}
-        def close(self):
-            pass
+from env.adverse_market_env import AdverseMarketEnv
 
 class Observation(BaseModel):
     price_returns: List[float]       # 19 rolling log-returns
@@ -42,59 +25,73 @@ class Reward(BaseModel):
     drawdown_penalty: float
     transaction_cost: float
 
-class OpenEnvAdverseMarket:
+class State(BaseModel):
+    task_id: str
+    step: int
+    observation: Optional[Observation]
+    regime: Optional[str]
+
+class OpenEnvAdverseMarket(Environment):
     """OpenEnv-compliant wrapper around AdverseMarketEnv."""
 
     def __init__(self, task_id: str = 'adversarial-market',
                  adversary_policy=None):
+        super().__init__()
         self._task_id = task_id
         self._env = AdverseMarketEnv(adversary_policy=adversary_policy)
         self._last_obs = None
         self._step_count = 0
 
-    def reset(self) -> Observation:
+    def reset(self, seed: Optional[int] = None, episode_id: Optional[str] = None, **kwargs) -> Observation:
+        """Reset the environment."""
         obs_arr, _ = self._env.reset()
         self._step_count = 0
         self._last_obs = self._arr_to_obs(obs_arr)
         return self._last_obs
 
-    def step(self, action: Action):
-        # Gym might return 5 values (obs, reward, terminated, truncated, info)
-        ret = self._env.step(action.action_index)
+    def step(self, action: Union[Action, Dict[str, Any], int], timeout_s: Optional[float] = None, **kwargs):
+        """Execute a step in the environment."""
+        # Handle different action input types (OpenEnv can pass dicts or Pydantic models)
+        if isinstance(action, Action):
+            act_idx = action.action_index
+        elif isinstance(action, dict):
+            act_idx = action.get("action_index", 0)
+        else:
+            act_idx = int(action)
+
+        ret = self._env.step(act_idx)
         if len(ret) == 5:
             obs_arr, r, terminated, truncated, info = ret
             done = terminated or truncated
         else:
             obs_arr, r, done, info = ret
+            
         self._step_count += 1
         obs = self._arr_to_obs(obs_arr)
-        reward = Reward(
-            value=float(r), pnl_component=float(info.get('pnl', 0.0)),
-            inventory_penalty=0.0, drawdown_penalty=0.0,
-            transaction_cost=0.0)
+        
+        # OpenEnv expects a float reward, we return it but store details in info
+        reward_val = float(r)
         self._last_obs = obs
-        return obs, reward, done, info
+        
+        # Optional: return a Reward object if the caller expects it, 
+        # but the base class usually returns (obs, reward_val, done, info)
+        return obs, reward_val, done, info
 
-    def state(self) -> dict:
-        return {
-            'task_id': self._task_id,
-            'step': self._step_count,
-            'observation': self._last_obs.model_dump()
-                          if self._last_obs else None,
-            'regime': self._env.price_proc.regime
-                      if hasattr(self._env, 'price_proc') else None,
-        }
+    @property
+    def state(self) -> State:
+        """Return the current environment state."""
+        return State(
+            task_id=self._task_id,
+            step=self._step_count,
+            observation=self._last_obs if self._last_obs else None,
+            regime=self._env.price_proc.regime if hasattr(self._env, 'price_proc') else None
+        )
 
     def close(self):
         if hasattr(self._env, 'close'):
             self._env.close()
 
     def _arr_to_obs(self, arr: np.ndarray) -> Observation:
-        # Handling potentially smaller arrays from mock safely
-        pad = np.zeros(26)
-        if len(arr) < 26:
-            pad[:len(arr)] = arr
-            arr = pad
         return Observation(
             price_returns=arr[:19].tolist(),
             position_norm=float(arr[19]),

@@ -33,7 +33,7 @@ async def step(action: Action):
 @app.get("/state")
 async def state():
     env = get_env()
-    return env.state()
+    return env.state
 
 @app.get("/")
 async def root():
