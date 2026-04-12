@@ -8,12 +8,15 @@ tags: [openenv, finance, adversarial-rl, trading, robustness]
 tasks:
   - id: calm-market
     difficulty: easy
+    grader: tasks.task_grader:grade_calm_market
     description: Trade profitably in a benign bull-market regime.
   - id: volatile-market
     difficulty: medium
+    grader: tasks.task_grader:grade_volatile_market
     description: Trade profitably under random adversary perturbations.
   - id: adversarial-market
     difficulty: hard
+    grader: tasks.task_grader:grade_adversarial_market
     description: Trade profitably against a trained PPO adversary.
 action_space: Discrete(9)
 observation_space: Box(26,)
