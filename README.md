@@ -82,6 +82,6 @@ Below are the quantitative evaluations showcasing the Robustness Gap—highlight
 ![Regime Behavior](regime_behavior.png)
 
 *Final execution scores mapped directly from evaluator outputs:*
-- calm-market: 0.85
-- volatile-market: 0.61
-- adversarial-market: 0.22
+- calm-market: 0.47
+- volatile-market: 0.46
+- adversarial-market: 0.50
