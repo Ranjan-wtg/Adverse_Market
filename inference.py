@@ -96,12 +96,27 @@ def run_task(task_id: str):
         score = GRADERS[task_id](rewards, survived, final_pv)
         success = score >= cfg.success_threshold
         rewards_str = ','.join(f'{r:.2f}' for r in rewards)
-        print(f'[END] success={str(success).lower()}'
+        print(f'[END] task={task_id} success={str(success).lower()}'
+              f' score={score:.4f}'
               f' steps={step} rewards={rewards_str}', flush=True)
         env.close()
     return score
 
 # ── Entry point ─────────────────────────────────────────
 if __name__ == '__main__':
+    import json as _json
     task = os.getenv('TASK_ID', 'calm-market')
-    run_task(task)
+    
+    # If TASK_ID is set, run only that task
+    if os.getenv('TASK_ID'):
+        score = run_task(task)
+        print(f'[SCORE] {{"task": "{task}", "score": {score:.4f}}}', flush=True)
+    else:
+        # Run all tasks and report
+        results = {}
+        for t in ['calm-market', 'volatile-market', 'adversarial-market']:
+            os.environ['TASK_ID'] = t
+            s = run_task(t)
+            results[t] = s
+            print(f'[SCORE] {{"task": "{t}", "score": {s:.4f}}}', flush=True)
+        print(f'[RESULTS] {_json.dumps(results)}', flush=True)

@@ -7,6 +7,7 @@ def strictly_between_0_and_1(value: float) -> float:
     return float(0.01 + 0.98 * clipped)
 
 def grade_calm_market(episode_rewards: List[float],
+                      survived: bool,
                       final_portfolio: float,
                       initial_portfolio: float = 10000.0) -> float:
     """Easy: reward positive return. Score squashed to (0, 1)."""
@@ -25,7 +26,7 @@ def grade_volatile_market(episode_rewards: List[float],
         sharpe = rewards.mean() / (rewards.std() + 1e-8)
         sharpe_score = (sharpe + 1.0) / 2.0
     else:
-        sharpe_score = 0.0
+        sharpe_score = 0.5
     
     raw_score = 0.5 * survival_score + 0.5 * sharpe_score
     return strictly_between_0_and_1(raw_score)
@@ -35,14 +36,14 @@ def grade_adversarial_market(episode_rewards: List[float],
                               final_portfolio: float) -> float:
     """Hard: Sharpe under full adversary. Score squashed to (0, 1)."""
     if not survived:
-        return strictly_between_0_and_1(0.0)
+        return strictly_between_0_and_1(0.1)
     
     rewards = np.array(episode_rewards)
     if len(rewards) > 0 and rewards.std() > 0:
         sharpe = rewards.mean() / (rewards.std() + 1e-8)
-        sharpe_score = sharpe / 1.0  # Sharpe of 1.0 = top score
+        sharpe_score = sharpe / 1.0
     else:
-        sharpe_score = 0.0
+        sharpe_score = 0.5
         
     return strictly_between_0_and_1(sharpe_score)
 
