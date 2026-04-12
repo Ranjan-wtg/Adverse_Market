@@ -24,16 +24,9 @@ app = create_app(
     max_concurrent_envs=1,
 )
 
-from fastapi.responses import RedirectResponse
-@app.get("/")
-def read_root():
-    """Redirect the root URL to our Gradio Dashboard."""
-    return RedirectResponse(url="/ui")
-
-# ── Optional: mount Gradio dashboard at /ui ───────────────────────
+# ── Optional: mount Gradio dashboard at root ───────────────────────
 import os, sys, subprocess
 import gradio as gr
-
 
 def run_benchmark(task_id):
     env = os.environ.copy()
@@ -50,7 +43,6 @@ def run_benchmark(task_id):
     process.stdout.close()
     process.wait()
 
-
 with gr.Blocks(title="AdverseMarket-v0 Benchmark") as demo:
     gr.Markdown("# AdverseMarket-v0 RL Benchmark")
     gr.Markdown("Testing trading policy robustness against adversarial market regimes.")
@@ -65,8 +57,7 @@ with gr.Blocks(title="AdverseMarket-v0 Benchmark") as demo:
                                     max_lines=30, interactive=False)
     run_btn.click(fn=run_benchmark, inputs=[task_select], outputs=output_log)
 
-app = gr.mount_gradio_app(app, demo, path="/ui")
-
+app = gr.mount_gradio_app(app, demo, path="/")
 
 def main(host: str = "0.0.0.0", port: int = 7860):
     import uvicorn
